@@ -23,7 +23,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Build Debug APK
-        run: gradle :app:assembleDebug
+        run: ./gradlew :app:assembleDebug   # ✅ use wrapper
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
