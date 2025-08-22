@@ -1,17 +1,17 @@
-name: Android Debug Build
+name: Android CI
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up JDK 17
@@ -20,18 +20,26 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      # Optional: Only needed if you haven't committed the gradlew files yet
-      - name: Generate Gradle wrapper (if missing)
-        run: gradle wrapper
+      - name: Grant execute permission for Gradlew
+        run: chmod +x gradlew
 
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
+      - name: List Gradle tasks (debugging)
+        run: ./gradlew tasks
 
-      - name: Build debug APK
-        run: ./gradlew assembleDebug
+      - name: Build Debug APK
+        run: ./gradlew app:assembleDebug
 
-      - name: Upload debug APK
+      - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: debug-apk
           path: app/build/outputs/apk/debug/*.apk
+
+      - name: Build Release APK
+        run: ./gradlew app:assembleRelease
+
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: app/build/outputs/apk/release/*.apk
