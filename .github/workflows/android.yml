@@ -2,8 +2,7 @@ name: Android CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
   pull_request:
 
 jobs:
@@ -11,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up JDK 17
@@ -20,26 +19,14 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Grant execute permission for Gradlew
-        run: chmod +x gradlew
-
-      - name: List Gradle tasks (debugging)
-        run: ./gradlew tasks
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Build Debug APK
-        run: ./gradlew app:assembleDebug
+        run: gradle :app:assembleDebug
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: debug-apk
-          path: app/build/outputs/apk/debug/*.apk
-
-      - name: Build Release APK
-        run: ./gradlew app:assembleRelease
-
-      - name: Upload Release APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-apk
-          path: app/build/outputs/apk/release/*.apk
+          name: app-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
