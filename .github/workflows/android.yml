@@ -19,29 +19,27 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Enable Gradle caching
-        uses: gradle/actions/setup-gradle@v3
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
-      # Generate wrapper ONLY if gradlew or wrapper JAR is missing
-      - name: Ensure Gradle wrapper exists
-        run: |
-          set -euxo pipefail
-          if [ ! -f gradlew ] || [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
-            echo "Gradle wrapper missing -> installing system Gradle to generate it"
-            sudo apt-get update
-            sudo apt-get install -y gradle
-            gradle --version
-            gradle wrapper --gradle-version 8.7
-          fi
-          chmod +x gradlew
+      - name: Ensure Gradle wrapper is executable
+        run: chmod +x gradlew
 
-      - name: Verify Gradle projects
-        run: |
-          ./gradlew --version
-          ./gradlew projects
+      - name: Verify Gradle version
+        run: ./gradlew --version
+
+      - name: Run Unit Tests
+        run: ./gradlew test
 
       - name: Build Debug APK
-        run: ./gradlew :app:assembleDebug
+        run: ./gradlew :app:assembleDebug --stacktrace --info
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
